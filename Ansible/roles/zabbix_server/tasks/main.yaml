@@ -1,0 +1,88 @@
+    - name: Установка репозитория zabbix
+      become: yes
+      apt:
+        deb: https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.4-1+ubuntu20.04_all.deb 
+        state: present
+
+    - name: Установка zabbix server, web interface,apache
+      apt:
+        update_cache: yes
+        name:
+          - apache2
+          - zabbix-server-mysql
+          - zabbix-frontend-php
+          - zabbix-apache-conf
+          - zabbix-sql-scripts
+          - zabbix-agent
+        state: latest
+
+    - name: Установка mysql server
+      apt:
+        name: mysql-server
+        state: present
+
+    - name: Запуск службы mysql
+      systemd:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Установка python3
+      apt: 
+        name: python3-pymysql
+        state: present
+
+    - name: Установка пароля пользователя root mysql
+      mysql_user:
+        user: root
+        password: Password
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        
+    - name: Создание базы данных zabbix
+      mysql_db:
+        name: zabbix
+        login_user: root
+        login_password: Password
+        collation: utf8_bin
+        state: present
+
+    - name: Создание пользователя zabbix
+      mysql_user:
+        name: zabbix
+        password: zabbix
+        host: localhost
+        priv: '*.*:ALL'
+        login_user: root
+        login_password: Password
+        state: present
+
+    - name: Импорт начальной схемы и данных
+      mysql_db:
+        name: zabbix
+        state: import
+        target: /usr/share/zabbix-sql-scripts/mysql/server.sql.gz
+        login_user: zabbix
+        login_host: localhost
+        login_password: zabbix
+      
+    - name: Минимальная настройка конфигурации zabbix server
+      lineinfile:
+        path: /etc/zabbix/zabbix_server.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        backup: yes
+      with_items:
+        - { regexp: '# DBPassword=', line: 'DBPassword=zabbix'}
+        - { regexp: '# DBHost=', line: 'DBHost=localhost'}
+    
+    - name: Запуск службы zabbix-server
+      systemd:
+        name: zabbix-server
+        state: started
+        enabled: yes
+      
+    - name: Перезапуск службы apache2
+      systemd:
+        name: apache2
+        state: restarted
+        enabled: yes

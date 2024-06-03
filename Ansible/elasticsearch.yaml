@@ -1,0 +1,5 @@
+---
+- name: elasticsearch
+  hosts: elasticsearch
+  roles:
+  - elasticsearch

@@ -61,6 +61,75 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 ### Резервное копирование
 Создайте snapshot дисков всех ВМ. Ограничьте время жизни snaphot в неделю. Сами snaphot настройте на ежедневное копирование.
 
-#Решение:
+# Решение:
+
+## Инфраструктура
+Скриншот созданной инфраструктуры:
+
+![alt text](img/YC.jpg)
+
+### Сайт
+Скриншот выполнения команды curl на адрес балансировщика:
+
+![alt text](img/cirl.jpg)
 
 
+### Мониторинг
+Для системы мониторинга был использован Zabbix:
+
+![alt text](img/zabbix.jpg)
+
+Были настроены триггеры на превышение пороговых значений, постоянный мониторинг http запросами, некоторые триггеры были специально занижены, чтобы проверить срабатывание
+
+![alt text](img/zabbix-trigger.jpg)
+
+### Логи
+
+Тест работы filebeat:
+
+![alt text](img/filebeat.jpg)
+
+Скриншот работы Kibana:
+
+![alt text](img/kibana.jpg)
+
+### Сеть
+
+Результат работы ansible ping c машины bastion-host:
+
+![alt text](<img/ansible ping.jpg>)
+
+### Резервное копирование
+
+```c
+resource "yandex_compute_snapshot_schedule" "default" {
+  name = "default"
+
+  schedule_policy {
+    expression = "0 0 * * *"
+  }
+
+  snapshot_count = 7
+
+  snapshot_spec {
+    description = "daily"
+    labels = {
+      snapshot-label = "snapshot-label-value"
+    }
+  }
+
+  labels = {
+    my-label = "my-label-value"
+  }
+
+  disk_ids = [yandex_compute_instance.bastion-host.boot_disk.0.disk_id,
+    yandex_compute_instance.web-server1.boot_disk.0.disk_id,
+    yandex_compute_instance.web-server2.boot_disk.0.disk_id,
+    yandex_compute_instance.zabbix.boot_disk.0.disk_id,
+    yandex_compute_instance.elasticsearch.boot_disk.0.disk_id,
+    yandex_compute_instance.kibana.boot_disk.0.disk_id]
+}
+```
+
+### Компромиссные решения
+Все ansible-playbook`s запускались с машины bastion-host, туда был заранее установлен ansible через команду в метафайле.

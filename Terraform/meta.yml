@@ -1,0 +1,14 @@
+#cloud-config
+users:
+  - name: user
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+     - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDeta6lUwlQcKI77QSaTT6WygO5VQ3mQ/2F/5zcr5vFCtophPffKpuGeg/fBworSEYGbfWSzvce+F6OhMlPjgdehagprp2L+QCRnIWhLH7s7bTq4jt4T9VzAnGcSi1z6rs1pEMUWoNuMX+rB+5FeFtXxFF7l5zHW2sx/5CNIWSm971eLX/If+x0E4P9l9DdgAO1bInrfB0ynuzw//mzex97n6u2QE7hS5iOIRpEOi/lr3PzOXyZhZvS5QCElvODEmZwOex894+5TYFJTcYA99Zugcp+z7sHVK1HN7Jxs1Tp7/3LTuzD3UO31tIMpBzS0YnUIfKMKzHvHM7ZKxhnLpftVZ9EWbJ3KF3+q8GFTBG7czudO4x7Q9PSIRX9strYXz3QzcSNumpfwgG3D0gvPUkZR/IXXBSafhKeLIMJzgr2tp9BjVw3sfGaYZCmb30q2B24D3jHrvhF1fA0vZ1dqqqI4CdfiiVSs4vRBPAlU8idX9HrXlmTlW5VoznHEb+32+k= motorher@DESKTOP-NGLG1VS
+
+repo_update: true
+repo_upgrade: true
+apt:
+  preserve_sources_list: true
+

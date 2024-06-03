@@ -1,0 +1,28 @@
+    - name: Установка репозитория zabbix
+      become: yes
+      apt:
+        deb: https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.4-1+ubuntu20.04_all.deb 
+        state: present
+      
+    - name: "install zabbix agent"
+      apt:
+        update_cache: yes
+        name:  
+         - zabbix-agent2
+         - zabbix-agent2-plugin-*
+        state: latest
+      
+    - name: Настройка конфигурации zabbix agent
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        backup: yes
+      with_items:
+        - { regexp: 'Server=127.0.0.1', line: 'Server=10.0.3.5'}
+        - { regexp: 'ServerActive=127.0.0.1', line: 'ServerActive=10.0.3.5'}
+      
+    - name: Запуск службы zabbix агент
+      systemd:
+        name: zabbix-agent2.service      
+        state: restarted

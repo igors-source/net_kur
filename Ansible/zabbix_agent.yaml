@@ -1,0 +1,5 @@
+---
+- name: zabbix agent
+  hosts: web
+  roles:
+  - zabbix_agent
